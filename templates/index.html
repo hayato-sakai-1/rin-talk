@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rin-Talk for Web</title>
+    <style>
+        /* 簡単なデザイン */
+        body { font-family: 'Helvetica', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; }
+        .container { width: 80%; }
+        #question-display { min-height: 200px; font-size: 2.5em; }
+        #next-button { font-size: 1.5em; padding: 10px 20px; cursor: pointer; }
+        #countdown-display { font-size: 6em; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="question-display">
+            <h1>Rin-Talk</h1>
+        </div>
+        <button id="next-button">始める</button>
+    </div>
+
+    <script>
+        // ボタンなどの要素を取得
+        const questionDisplay = document.getElementById('question-display');
+        const nextButton = document.getElementById('next-button');
+        const countdownDisplay = document.createElement('div');
+        countdownDisplay.id = 'countdown-display';
+
+        // ボタンがクリックされた時の処理
+        nextButton.addEventListener('click', () => {
+            // 1. カウントダウンを開始
+            nextButton.disabled = true; // ボタンを無効化
+            let count = 3;
+            questionDisplay.innerHTML = ''; // テキストをクリア
+            questionDisplay.appendChild(countdownDisplay);
+            
+            const countdownInterval = setInterval(() => {
+                countdownDisplay.innerText = count;
+                count--;
+                if (count < 0) {
+                    clearInterval(countdownInterval);
+                    // 2. カウントダウン終了後、サーバーに質問を問い合わせる
+                    fetch('/get_question')
+                        .then(response => response.json())
+                        .then(data => {
+                            // 3. 受け取った質問を表示
+                            questionDisplay.innerHTML = `<h1>${data.question}</h1>`;
+                            nextButton.innerText = '次の質問へ';
+                            nextButton.disabled = false; // ボタンを再度有効化
+                        });
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
