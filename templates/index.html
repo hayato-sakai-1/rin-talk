@@ -5,12 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rin-Talk for Web</title>
     <style>
-        /* 簡単なデザイン */
-        body { font-family: 'Helvetica', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; }
-        .container { width: 80%; }
-        #question-display { min-height: 200px; font-size: 2.5em; }
-        #next-button { font-size: 1.5em; padding: 10px 20px; cursor: pointer; }
-        #countdown-display { font-size: 6em; font-weight: bold; }
+      body {
+            /* 変更点：背景色を、より柔らかい、ほぼ白に近いグレーに変更 */
+            font-family: 'Helvetica', 'Arial', 'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴ ProN W3', 'Meiryo', 'メイリオ', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+            background-color: #fdfdfd; 
+        }
+
+        /* 変更点：白い枠をなくし、コンテンツを中央に寄せるためだけの、透明な入れ物に変更 */
+        .container {
+            width: 90%;
+            max-width: 1000px;
+        }
+
+        #question-display {
+            min-height: 250px;
+            /* 変更点：質問の文字サイズを、少しだけ小さく調整 */
+            font-size: 1.0rem; 
+            font-weight: bold;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #next-button {
+            font-size: 1.1rem; /* ボタンの文字サイズも少し調整 */
+            padding: 10px 22px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            background-color: #f7f7f7;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+        #next-button:hover {
+            background-color: #e9e9e9;
+        }
+        #next-button:disabled {
+            cursor: not-allowed;
+            background-color: #ddd;
+        }
+        #countdown-display {
+            font-size: 7rem; /* カウントダウンも少し調整 */
+            font-weight: bold;
+            color: #555;
+        }
     </style>
 </head>
 <body>
@@ -22,33 +65,38 @@
     </div>
 
     <script>
-        // ボタンなどの要素を取得
         const questionDisplay = document.getElementById('question-display');
         const nextButton = document.getElementById('next-button');
         const countdownDisplay = document.createElement('div');
         countdownDisplay.id = 'countdown-display';
 
-        // ボタンがクリックされた時の処理
+        // 既存のカウントダウン処理を止めるための変数を準備
+        let countdownInterval = null;
+
         nextButton.addEventListener('click', () => {
-            // 1. カウントダウンを開始
-            nextButton.disabled = true; // ボタンを無効化
+            // もし、前回のカウントダウンが動いていたら、強制的に止める
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+
+            nextButton.disabled = true;
             let count = 3;
-            questionDisplay.innerHTML = ''; // テキストをクリア
+            questionDisplay.innerHTML = '';
             questionDisplay.appendChild(countdownDisplay);
-            
-            const countdownInterval = setInterval(() => {
-                countdownDisplay.innerText = count;
+            countdownDisplay.innerText = count;
+
+            countdownInterval = setInterval(() => {
                 count--;
-                if (count < 0) {
+                if (count > 0) {
+                    countdownDisplay.innerText = count;
+                } else {
                     clearInterval(countdownInterval);
-                    // 2. カウントダウン終了後、サーバーに質問を問い合わせる
                     fetch('/get_question')
                         .then(response => response.json())
                         .then(data => {
-                            // 3. 受け取った質問を表示
                             questionDisplay.innerHTML = `<h1>${data.question}</h1>`;
                             nextButton.innerText = '次の質問へ';
-                            nextButton.disabled = false; // ボタンを再度有効化
+                            nextButton.disabled = false;
                         });
                 }
             }, 1000);

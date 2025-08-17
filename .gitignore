@@ -1,3 +1,12 @@
-# Python cache files
+# Python
+.venv/
+venv/
 __pycache__/
 *.pyc
+
+# VSCode
+.vscode/
+
+# OS-specific
+.DS_Store
+Thumbs.db

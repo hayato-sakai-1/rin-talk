@@ -20,3 +20,8 @@ def get_question():
     new_q = generate_question()
     # 質問のテキストをJSON形式で返す
     return jsonify(question=new_q)
+
+if __name__ == "__main__":
+    # ローカルで動かす場合は、PORTが設定されていないので、代わりに5000番を使う
+    port = int(os.getenv("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
