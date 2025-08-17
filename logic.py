@@ -2,11 +2,15 @@ import json
 import random
 import os
 
-# data.jsonのみを使うシンプルな作り
+# このスクリプト(logic.py)が存在するディレクトリの絶対パスを取得
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# data.jsonへの絶対パスを構築
+DATA_FILE_PATH = os.path.join(BASE_DIR, 'data.json')
+
 def load_data():
-    """ 同梱された初期データを読み込む """
-    # Webサーバーの実行場所を基準に、data.jsonを探す
-    with open('data.json', 'r', encoding='utf-8') as f:
+    """ 同梱された初期データを、絶対パスで読み込む """
+    # 変更点：絶対パスでファイルを開く
+    with open(DATA_FILE_PATH, 'r', encoding='utf-8') as f:
         return json.load(f)
 
 def generate_question():
