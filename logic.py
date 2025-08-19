@@ -4,6 +4,11 @@ import os
 from ibmcloudant.cloudant_v1 import CloudantV1
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 
+# このスクリプト(logic.py)が存在するディレクトリの絶対パスを取得
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# data.jsonへの絶対パスを構築
+DATA_FILE_PATH = os.path.join(BASE_DIR, 'data.json')
+
 # --- データベース接続設定 ---
 try:
     authenticator = IAMAuthenticator(os.environ.get('CLOUDANT_APIKEY'))
@@ -18,7 +23,7 @@ DB_NAME = "rintalk-user-data"
 
 # --- 初期データの読み込み ---
 def load_default_templates():
-    with open('data.json', 'r', encoding='utf-8') as f:
+    with open(DATA_FILE_PATH, 'r', encoding='utf-8') as f:
         return json.load(f).get('question_templates', {})
 
 # --- データベースからキーワードを取得 ---
