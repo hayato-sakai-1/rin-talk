@@ -5,27 +5,35 @@ from ibmcloudant.cloudant_v1 import CloudantV1
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 
 # --- データベース接続設定 ---
+db_client = None
 try:
     apikey = os.environ.get('CLOUDANT_APIKEY')
     url = os.environ.get('CLOUDANT_URL')
-    if not apikey or not url:
-        raise ValueError("環境変数 CLOUDANT_APIKEY または CLOUDANT_URL が設定されていません。")
     
-    authenticator = IAMAuthenticator(apikey)
-    db_client = CloudantV1(authenticator=authenticator)
-    db_client.set_service_url(url)
-    print("データベースに接続しました。")
-except Exception as e:
-    print(f"データベース接続エラー: {e}")
-    db_client = None
+    # 【変更点】環境変数が存在しない場合に、明確なエラーメッセージを出す
+    if not apikey or not url:
+        print("!!! 重大なエラー: 環境変数 CLOUDANT_APIKEY または CLOUDANT_URL が設定されていません。")
+    else:
+        authenticator = IAMAuthenticator(apikey)
+        db_client = CloudantV1(authenticator=authenticator)
+        db_client.set_service_url(url)
+        print(">>> データベースへの接続準備が完了しました。")
 
-DB_NAME = "rintalk-user-data"
+except Exception as e:
+    print(f"!!! 重大なエラー: データベース接続の初期化中に例外が発生しました: {e}")
+
 
 # --- 初期データの読み込み ---
 def load_default_templates():
     # DockerfileのWORKDIR /app を基準にするため、これでOK
-    with open('data.json', 'r', encoding='utf-8') as f:
-        return json.load(f).get('question_templates', {})
+    try:
+        with open('data.json', 'r', encoding='utf-8') as f:
+            print(">>> data.json の読み込みに成功しました。")
+            return json.load(f).get('question_templates', {})
+    except Exception as e:
+        # 【変更点】もし、万が一ファイルが見つからなければ、明確なログを残す
+        print(f"!!! 重大なエラー: data.json の読み込みに失敗しました: {e}")
+        return {} # 空のテンプレートを返すことで、クラッシュを防ぐ
 
 # (以降のコードは、先日お渡ししたものから変更ありません)
 def get_user_data_from_db():
