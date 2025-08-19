@@ -1,2 +1,4 @@
 Flask
 gunicorn
+ibm-cloud-sdk-core
+ibmcloudant
