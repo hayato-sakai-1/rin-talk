@@ -6,10 +6,12 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
+    print(">>> ルート '/' が呼び出されました。index.html を返します。")
     return render_template("index.html")
 
 @app.route("/settings")
 def settings():
+    print(">>> ルート '/settings' が呼び出されました。settings.html を返します。")
     return render_template("settings.html")
 
 @app.route("/get_question")
