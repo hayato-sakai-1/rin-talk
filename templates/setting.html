@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>設定 - Rin-Talk</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .container { max-width: 500px; margin: auto; }
+        input { font-size: 1em; padding: 5px; }
+        button { font-size: 1em; padding: 5px 10px; margin-left: 10px; }
+        ul { list-style: none; padding: 0; }
+        li { padding: 5px; border-bottom: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center; }
+        .delete-btn { color: red; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>設定</h1>
+        <h2>興味・キーワードの管理</h2>
+        <div>
+            <input type="text" id="keyword-input" placeholder="キーワードを入力">
+            <button id="add-btn">追加</button>
+        </div>
+        <ul id="keyword-list"></ul>
+        <hr>
+        <button id="save-btn">保存して閉じる</button>
+        <p id="status-message"></p>
+    </div>
+
+    <script>
+        // JavaScript部分は変更なし
+        const keywordInput = document.getElementById('keyword-input');
+        const addBtn = document.getElementById('add-btn');
+        const keywordList = document.getElementById('keyword-list');
+        const saveBtn = document.getElementById('save-btn');
+        const statusMessage = document.getElementById('status-message');
+
+        fetch('/api/keywords')
+            .then(res => res.json())
+            .then(data => {
+                data.keywords.forEach(addKeywordToList);
+            });
+
+        function addKeywordToList(keyword) {
+            const li = document.createElement('li');
+            li.textContent = keyword;
+            const deleteBtn = document.createElement('span');
+            deleteBtn.textContent = '削除';
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.onclick = () => li.remove();
+            li.appendChild(deleteBtn);
+            keywordList.appendChild(li);
+        }
+
+        addBtn.onclick = () => {
+            const keyword = keywordInput.value.trim();
+            if (keyword) {
+                addKeywordToList(keyword);
+                keywordInput.value = '';
+            }
+        };
+
+        keywordInput.onkeydown = (e) => {
+            if (e.key === 'Enter') addBtn.click();
+        };
+
+        saveBtn.onclick = () => {
+            const keywords = Array.from(keywordList.children).map(li => li.firstChild.textContent);
+            
+            fetch('/api/keywords', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ keywords: keywords })
+            })
+            .then(res => res.json())
+            .then(data => {
+                statusMessage.textContent = data.message;
+                if(data.success) {
+                    setTimeout(() => window.close(), 1000);
+                }
+            });
+        };
+    </script>
+</body>
+</html>

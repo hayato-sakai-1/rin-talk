@@ -8,9 +8,6 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# ▼▼▼【ここに追加】調査用コマンド：厨房の中身を、すべてリストアップせよ！▼▼▼
-RUN ls -la
-
 # ステップ4：レシピブック全体（ソースコード）を、厨房にコピーする
 COPY . .
 

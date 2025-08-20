@@ -2,86 +2,69 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>設定 - Rin-Talk</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rin-Talk for Web</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        .container { max-width: 500px; margin: auto; }
-        input { font-size: 1em; padding: 5px; }
-        button { font-size: 1em; padding: 5px 10px; margin-left: 10px; }
-        ul { list-style: none; padding: 0; }
-        li { padding: 5px; border-bottom: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center; }
-        .delete-btn { color: red; cursor: pointer; }
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; background-color: #fdfdfd; }
+        .container { width: 90%; max-width: 1000px; position: relative; }
+        #question-display { min-height: 200px; font-size: 2.0rem; font-weight: bold; color: #333; display: flex; justify-content: center; align-items: center; }
+        #next-button { font-size: 1.1rem; padding: 10px 22px; cursor: pointer; border: 1px solid #ccc; background-color: #f7f7f7; border-radius: 5px; }
+        #countdown-display { font-size: 7rem; font-weight: bold; color: #555; }
+        #settings-button { position: absolute; top: 20px; right: 20px; cursor: pointer; border: none; background: none; }
+        #settings-button img { width: 40px; height: 40px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>設定</h1>
-        <h2>興味・キーワードの管理</h2>
-        <div>
-            <input type="text" id="keyword-input" placeholder="キーワードを入力">
-            <button id="add-btn">追加</button>
+        <button id="settings-button">
+            <img src="/static/gear-icon.png" alt="設定">
+        </button>
+        <div id="question-display">
+            <h1>Rin-Talk</h1>
         </div>
-        <ul id="keyword-list"></ul>
-        <hr>
-        <button id="save-btn">保存して閉じる</button>
-        <p id="status-message"></p>
+        <button id="next-button">始める</button>
     </div>
 
     <script>
-        const keywordInput = document.getElementById('keyword-input');
-        const addBtn = document.getElementById('add-btn');
-        const keywordList = document.getElementById('keyword-list');
-        const saveBtn = document.getElementById('save-btn');
-        const statusMessage = document.getElementById('status-message');
+        // JavaScript部分は変更なし
+        const questionDisplay = document.getElementById('question-display');
+        const nextButton = document.getElementById('next-button');
+        const settingsButton = document.getElementById('settings-button');
+        const countdownDisplay = document.createElement('div');
+        countdownDisplay.id = 'countdown-display';
+        let countdownInterval = null;
 
-        // ページ読み込み時に、現在のキーワードをサーバーから取得
-        fetch('/api/keywords')
-            .then(res => res.json())
-            .then(data => {
-                data.keywords.forEach(addKeywordToList);
-            });
+        nextButton.addEventListener('click', () => {
+            if (countdownInterval) clearInterval(countdownInterval);
+            nextButton.disabled = true;
+            let count = 3;
+            questionDisplay.innerHTML = '';
+            questionDisplay.appendChild(countdownDisplay);
+            countdownDisplay.innerText = count;
 
-        function addKeywordToList(keyword) {
-            const li = document.createElement('li');
-            li.textContent = keyword;
-            const deleteBtn = document.createElement('span');
-            deleteBtn.textContent = '削除';
-            deleteBtn.className = 'delete-btn';
-            deleteBtn.onclick = () => li.remove();
-            li.appendChild(deleteBtn);
-            keywordList.appendChild(li);
-        }
-
-        addBtn.onclick = () => {
-            const keyword = keywordInput.value.trim();
-            if (keyword) {
-                addKeywordToList(keyword);
-                keywordInput.value = '';
-            }
-        };
-
-        keywordInput.onkeydown = (e) => {
-            if (e.key === 'Enter') {
-                addBtn.click();
-            }
-        };
-
-        saveBtn.onclick = () => {
-            const keywords = Array.from(keywordList.children).map(li => li.firstChild.textContent);
-            
-            fetch('/api/keywords', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ keywords: keywords })
-            })
-            .then(res => res.json())
-            .then(data => {
-                statusMessage.textContent = data.message;
-                if(data.success) {
-                    setTimeout(() => window.close(), 1000);
+            countdownInterval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdownDisplay.innerText = count;
+                } else {
+                    clearInterval(countdownInterval);
+                    fetch('/get_question')
+                        .then(response => response.json())
+                        .then(data => {
+                            const h1 = document.createElement('h1');
+                            h1.innerText = data.question;
+                            questionDisplay.innerHTML = '';
+                            questionDisplay.appendChild(h1);
+                            nextButton.innerText = '次の質問へ';
+                            nextButton.disabled = false;
+                        });
                 }
-            });
-        };
+            }, 1000);
+        });
+
+        settingsButton.addEventListener('click', () => {
+            window.open('/settings', '_blank', 'width=500,height=450');
+        });
     </script>
 </body>
 </html>
