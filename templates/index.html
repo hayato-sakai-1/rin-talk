@@ -18,12 +18,10 @@
         .container {
             width: 90%;
             max-width: 1000px;
-            position: relative;
         }
         #question-display {
             min-height: 200px;
-            /* PC向けの基本サイズ */
-            font-size: 2.2rem; 
+            font-size: 1rem; 
             font-weight: bold;
             color: #333;
             display: flex;
@@ -39,48 +37,49 @@
             border-radius: 5px;
         }
         #countdown-display {
-            /* PC向けの基本サイズ */
-            font-size: 8rem;
+            font-size: 7rem;
             font-weight: bold;
             color: #555;
         }
+
         #settings-button {
-            position: absolute;
-            top: 20px;
-            right: 20px;
+            position: fixed; /* 基準を、ブラウザの画面そのものに変更 */
+            top: 30px;       /* 画面の上から20px */
+            right: 20px;     /* 画面の右から20px */
             cursor: pointer;
             border: none;
             background: none;
+            z-index: 100; /* 他の要素の前面に表示するための、念のためのおまじない */
         }
         #settings-button img {
             width: 40px;
             height: 40px;
         }
 
-        /* ▼▼▼【ここからが魔法】スマートフォン向けの、特別ルールを追加 ▼▼▼ */
         @media (max-width: 600px) {
             #question-display {
-                font-size: 1.2rem; /* スマホでは、質問の文字を少し小さく */
+                font-size: 0.6rem;
             }
             #countdown-display {
-                font-size: 3rem; /* カウントダウンも、少し小さく */
+                font-size: 4rem;
             }
             #settings-button {
-                top: 3px;
+                top: 50px;
                 right: 10px;
             }
             #settings-button img {
-                width: 30px; /* アイコンも少し小さくして、重なりを防ぐ */
-                height: 30px;
+                width: 50px;
+                height: 50px;
             }
         }
     </style>
 </head>
 <body>
+    <button id="settings-button">
+        <img src="/static/gear-icon.png" alt="設定">
+    </button>
+    
     <div class="container">
-        <button id="settings-button">
-            <img src="/static/gear-icon.png" alt="設定">
-        </button>
         <div id="question-display">
             <h1>Rin-Talk</h1>
         </div>
